@@ -5,10 +5,16 @@
 
 body {
     margin: 0;
-    /* background-color: #FDFD96; */
     font-family: 'Poppins', sans-serif;
     min-height: 100vh;
     color: var(--text);
-    /* font-weight: 600; */
   }
   
+
+  body.no-scroll {
+    overflow: hidden !important;
+    position: relative;
+    height: 100%;
+    touch-action: none;
+    -ms-touch-action: none;
+  }

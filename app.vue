@@ -1,33 +1,32 @@
 <template>
   <div>
-    <div v-if="step == 1" class="min-h-screen p-6">
+    <div class="min-h-screen p-6 relative z-[2]">
         <h1 class="text-center pt-6 text-3xl sm:text-4xl font-bold text-primary">Receipt Compiler</h1>
+        <h2 class="text-center pt-4 font-medium text-sm sm:text-base">Combine your receipts into a pdf file</h2>
         <div class="w-full max-w-[600px] mx-auto mt-10">
-          <PhotoDrop @input="handleFiles" />
+          <PhotoDrop v-if="step == 1" @input="handleFiles" />
+          <div v-if="step == 2" class="h-[150px] md:h-[200px] flex items-center justify-center">
+            <button class="pdf-icon" @click="generatePdf()" ref="downloadBtn">
+              <img src="/pdf-icon.png" class="z-[2] relative">
+              <img src="/sparkle.webp" class="sparkle z-1">
+            </button>
+          </div>
+          <div v-if="step == 2" class="grid mx-auto max-w-[200px] gap-4 mt-4">
+            <button @click="generatePdf()" class="bg-primary rounded-md text-white py-2 font-semibold border-transparent border-[1px]">Download PDF</button>
+            <button @click="step = 1" class=" text-primary py-2 font-semibold border-transparent border-[1px]">Back</button>
+          </div>
         </div>
-      <p class="mt-6 text-xs sm:text-sm font-medium text-center !leading-loose">*Make sure to rename your receipts with "<b>YYYY-MM-DD AMOUNT</b>" format. <br>e.g: &nbsp;&nbsp;2024-12-01 5.60.jpg</p>
+      <p v-show="step == 1" class="mt-6 text-xs sm:text-sm font-medium text-center !leading-loose">*Make sure to rename your receipts with "<b>YYYY-MM-DD AMOUNT</b>" format. <br>e.g: &nbsp;&nbsp;2024-12-01 5.60.jpg</p>
     </div>
-    <div v-if="step == 2" class="p-6 overflow-hidden h-screen relative">
-      <div class="opacity-0">
+
+    <div v-show="step == 2" class="p-6 overflow-hidden h-screen absolute z-[1] w-full opacity-0">
+      <!-- Just to load image to get image width and height -->
+      <div>
         <div v-for="(group, date) in receiptGroups" class="mb-10">
           <div>
-            <div class="inline-block bg-blue-300 font-medium py-1 px-2">
-              <span>{{ date }}</span>
-              <span class="ml-3 text-lg">RM {{ group.total.toFixed(2) }}</span>
-            </div>
             <div class="flex mt-2">
               <img v-for="(r, rIndex) in group.receipts" :src="r.url" :style="{maxWidth: `${100 / group.receipts.length}%`, height: '380px'}" :data-receipt-id="`r_${date}_${rIndex}`">
             </div>
-          </div>
-        </div>
-      </div>
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div class="h-[300px] relative flex flex-col justify-end">
-          <button class="pdf-icon" @click="generatePdf()" ref="downloadBtn">
-            <img src="/pdf-icon.png">
-          </button>
-          <div>
-            <Panda />
           </div>
         </div>
       </div>
@@ -39,6 +38,14 @@
 import { jsPDF } from "jspdf";
 
 const step = ref(1)
+watch(step, (newValue) => {
+  if (newValue == 2) {
+    window.document.body.classList.add('no-scroll')
+  }
+  else {
+    window.document.body.classList.remove('no-scroll')
+  }
+})
 
 const getReceiptDateFromFileName = (imageFileName) => {
   const dateRegex = /\d{4}-\d{2}-\d{2}/
@@ -189,28 +196,41 @@ const generatePdf = () => {
 
 <style scoped>
 .pdf-icon {
-  position: absolute;
-  width: 100px;
-  left: 50%;
-  bottom: 30px;
-  transform: translateX(-50%);
+  width: 60px;
   opacity: 0;
 }
 
 .pdf-icon.active {
-  animation: fly 0.6s ease forwards;
+  animation: fly 0.9s ease forwards;
 }
 
 @keyframes fly {
   0% {
     opacity: 0;
-    transform: translateX(-50%) scale(0.3);
-    bottom: 30px;
+    transform: scale(0.3);
   }
   100% {
     opacity: 1;
-    transform: translateX(-50%) scale(1);
-    bottom: 170px;
+    transform: scale(1);
+  }
+}
+
+.sparkle {
+  animation: spinGrow 3s linear infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+@keyframes spinGrow {
+  0% {
+    transform: translate(-50%, -50%) scale(4) rotate(0deg);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(2.75) rotate(180deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4) rotate(360deg);
   }
 }
 </style>
