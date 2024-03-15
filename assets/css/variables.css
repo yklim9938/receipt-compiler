@@ -1,0 +1,58 @@
+@tailwind base;
+
+@layer base {
+	:root {
+        --text: #0f172a;
+        --text-light: #334155;
+        --card: rgba(0, 0, 0, 0.05);
+        --primary: #443858;
+        --primary-light: #818cf8;
+        --secondary: #a1dbff;
+        --secondary-light: #60a5fa;
+        --line: #d6D6D6;
+        --danger: #D74837;
+	}
+}
+
+:root {
+    /* window */
+    --window-height: 100vh; /* will be overwritten in app.vue */
+
+    /* inputs */
+    --o-primary: var(--primary);
+    --o-primary-light: var(--primary-light);
+    --o-padding: 0.5em 0.875em;
+    --o-border-radius: 0px;
+    --o-border-width: 3px;
+    --o-border-color: #000;
+    --o-bg: #fff;
+    --o-text: var(--text);
+    --o-shadow: 3px 3px 0px #000;
+    --o-shadow-hover: 0px 0px 0px #000;
+    --o-shadow-focus: 0px 0px 0px #000;
+    --o-select-arrow: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23444' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    --o-disabled: #D6D6D6;
+
+    /* Checkbox */
+    --checbox-bg: #fff;
+    --checkbox-border-radius: 2px;
+    --checkbox-border-color:  var(--line);
+    --tick-color: #fff;
+    --switch-thumb: #94a3b8;
+    --switch-thumb-checked: #fff;
+
+    /* OptionsWrapper */
+    --o-dropdown-bg: #FFFFFF;
+    --o-dropdown-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+
+    /* Select */
+    --o-option-input-bg: #ffffff;
+    --o-option-selected-bg: var(--primary);
+    --o-option-hover-bg: var(--primary);
+    --o-option-selected-text: #000;
+
+    /* DatePicker */
+    --o-text-light: #888888;
+    --o-date-selected-text: #fff;
+    --o-date-selected-bg: var(--primary);
+}
