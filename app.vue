@@ -37,6 +37,15 @@
 <script setup>
 import { jsPDF } from "jspdf";
 
+useSeoMeta({
+  title: 'Receipt Compiler - Combine your receipts into a pdf file',
+  ogTitle: 'Receipt Compiler - Combine your receipts into a pdf file',
+  description: 'Groups your receipts by date and automatically calculates the total amount.',
+  ogDescription: 'Groups your receipts by date and automatically calculates the total amount.',
+  ogImage: '/card.png',
+  twitterCard: 'summary_large_image',
+})
+
 const step = ref(1)
 watch(step, (newValue) => {
   if (newValue == 2) {
