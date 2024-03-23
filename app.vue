@@ -25,7 +25,8 @@
         <div v-for="(group, date) in receiptGroups" class="mb-10">
           <div>
             <div class="flex mt-2">
-              <img v-for="(r, rIndex) in group.receipts" :src="r.url" :style="{maxWidth: `${100 / group.receipts.length}%`, height: '380px'}" :data-receipt-id="`r_${date}_${rIndex}`">
+              <!-- from the calculation stated at generatePdf(), section width is 180 and max image height is 108px -->
+              <img v-for="(r, rIndex) in group.receipts" :src="r.url" :style="{maxWidth: `calc(180px / ${group.receipts.length})`, maxHeight: '108px'}" :data-receipt-id="`r_${date}_${rIndex}`">
             </div>
           </div>
         </div>
@@ -139,27 +140,27 @@ const generatePdf = () => {
         y_min = 148.5 + 7.5 = 156, y_max = 282
 
     * Therefore:
-    * width of each section = 195 - 15 = 180
+    * width of each section = 195 - 15 = 180 ⭐
     * height of each section = 141 - 15 = 126
 
     - height of text line = 15 (text), 3(margin) = 18
-    - max height of image = 126 - 18 = 108
+    - max height of image = 126 - 18 = 108 ⭐
     
   */
 
   for (let date in receiptGroups) {
-    let maxReceiptHeight = 0
+    // let maxReceiptHeight = 0
     // find max receipt height
     receiptGroups[date].receipts.forEach((receipt, receiptIndex) => {
       const receiptImage = document.querySelector(`img[data-receipt-id="r_${date}_${receiptIndex}"]`)
-      if (receiptImage.height > maxReceiptHeight) {
+      /* if (receiptImage.height > maxReceiptHeight) {
         maxReceiptHeight = receiptImage.height
-      }
+      } */
       receipt.originalWidth = receiptImage.width
       receipt.originalHeight = receiptImage.height
       
     })
-    receiptGroups[date].maxReceiptHeight = maxReceiptHeight
+    // receiptGroups[date].maxReceiptHeight = maxReceiptHeight
   }
 
   const doc = new jsPDF();
@@ -172,31 +173,22 @@ const generatePdf = () => {
       receipt: 159
     }
   ]
-  let section = 0 // 0 = upper, 1 = lower
+  let section = -1 // 0 = upper, 1 = lower. Will start at -1, the first iteration will turn it to 0
   for (let date in receiptGroups) {
-    doc.text(`${date}  ( RM${receiptGroups[date].total.toFixed(2)} )`, 15, drawCoordinatesY[section].total);
-    let drawWidth = 100 / receiptGroups[date].receipts.length * 180 // 180 is width of each section
-
-    let previousDrawX = 15
-    receiptGroups[date].receipts.forEach((r, i) => {
-      // calculate draw width and height
-      const imageRatio = r.originalWidth / r.originalHeight
-      let drawHeight = drawWidth / imageRatio
-      if (drawHeight > 108) { // 108 is max image height
-        drawHeight = 108
-        drawWidth = imageRatio * drawHeight
-      }
-      if (i > 0) {
-        previousDrawX += drawWidth
-      }
-      doc.addImage(r.url, 'jpeg', previousDrawX, drawCoordinatesY[section].receipt, drawWidth, drawHeight)
-    })
-
     section += 1
     if (section > 1) {
       doc.addPage('a4', 'portrait')
       section = 0
     }
+
+    doc.text(`${date}  ( RM${receiptGroups[date].total.toFixed(2)} )`, 15, drawCoordinatesY[section].total);
+    let previousDrawX = 15
+    receiptGroups[date].receipts.forEach((receipt, receiptIndex) => {
+      const receiptImage = document.querySelector(`img[data-receipt-id="r_${date}_${receiptIndex}"]`)
+      doc.addImage(receipt.url, 'jpeg', previousDrawX, drawCoordinatesY[section].receipt, receiptImage.width, receiptImage.height)
+      previousDrawX += receiptImage.width
+    })
+
   }
   doc.save("claims.pdf");
 }
