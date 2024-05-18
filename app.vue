@@ -32,6 +32,7 @@
         </div>
       </div>
     </div>
+    <div class="made-by z-[3]">Made by <a href="https://github.com/yklim9938" class="underline text-primary" target="_blank">YK Lim</a></div>
   </div>
 </template>
 
@@ -232,6 +233,21 @@ const generatePdf = () => {
   }
   100% {
     transform: translate(-50%, -50%) scale(4) rotate(360deg);
+  }
+}
+
+.made-by {
+	position: absolute;
+	bottom: 16px;
+	font-size: 14px;
+	left: 50%;
+	transform: translateX(-50%);
+  display: none;
+}
+
+@media screen and (min-height: 580px) {
+  .made-by {
+    display: block
   }
 }
 </style>
