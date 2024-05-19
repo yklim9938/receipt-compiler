@@ -3,7 +3,11 @@
     <div class="min-h-screen p-6 relative z-[2]">
         <h1 class="text-center pt-6 text-3xl sm:text-4xl font-bold text-primary">Receipt Compiler</h1>
         <h2 class="text-center pt-4 font-medium text-sm sm:text-base">Combine your receipts into a pdf file</h2>
-        <div class="w-full max-w-[600px] mx-auto mt-10">
+        <div class="w-full max-w-[600px] mx-auto mt-8">
+          <div v-show="step == 1" class="flex justify-center items-center mb-2 gap-2">
+              <span class="text-sm font-medium">Daily Max Claim:</span>
+              <input type="number" v-model="dailyMaxClaim" class="border border-slate-300 w-[80px] px-2 py-[1px] rounded" inputmode="numeric" pattern="[0-9]">
+          </div>
           <PhotoDrop v-if="step == 1" @input="handleFiles" />
           <div v-if="step == 2" class="h-[150px] md:h-[200px] flex items-center justify-center">
             <button class="pdf-icon" @click="generatePdf()" ref="downloadBtn">
@@ -25,7 +29,7 @@
         <div v-for="(group, date) in receiptGroups" class="mb-10">
           <div>
             <div class="flex mt-2">
-              <!-- from the calculation stated at generatePdf(), section width is 180 and max image height is 108px -->
+              <!-- from the calculation stated at generatePdf(), section width is 180px and max image height is 108px -->
               <img v-for="(r, rIndex) in group.receipts" :src="r.url" :style="{maxWidth: `calc(180px / ${group.receipts.length})`, maxHeight: '108px'}" :data-receipt-id="`r_${date}_${rIndex}`">
             </div>
           </div>
@@ -47,6 +51,8 @@ useSeoMeta({
   ogImage: '/card.png',
   twitterCard: 'summary_large_image',
 })
+
+const dailyMaxClaim = ref(15)
 
 const step = ref(1)
 watch(step, (newValue) => {
@@ -73,6 +79,7 @@ const getReceiptAmountFromFileName = (imageFileName) => {
 const groupImagesByDate = (imageFiles) => {
   let dates = {}
   let filenameFormatError = false
+  let maxClaim = parseFloat(dailyMaxClaim.value) || 15
   for (let i = 0; i < imageFiles.length; i++) {
     let receiptDate = getReceiptDateFromFileName(imageFiles[i].name)
     let receiptAmount = getReceiptAmountFromFileName(imageFiles[i].name)
@@ -81,14 +88,17 @@ const groupImagesByDate = (imageFiles) => {
       break;
     }
     
+    if (receiptAmount >= maxClaim) {
+      receiptAmount = maxClaim
+    }
     if (dates[receiptDate]) {
       dates[receiptDate].receipts.push({
         url: URL.createObjectURL(imageFiles[i]),
         amount: receiptAmount
       })
       dates[receiptDate].total += receiptAmount
-      if (dates[receiptDate].total >= 15) {
-        dates[receiptDate].total = 15
+      if (dates[receiptDate].total >= maxClaim) {
+        dates[receiptDate].total = maxClaim
       }
     }
     else {
@@ -148,21 +158,6 @@ const generatePdf = () => {
     - max height of image = 126 - 18 = 108 ⭐
     
   */
-
-  for (let date in receiptGroups) {
-    // let maxReceiptHeight = 0
-    // find max receipt height
-    receiptGroups[date].receipts.forEach((receipt, receiptIndex) => {
-      const receiptImage = document.querySelector(`img[data-receipt-id="r_${date}_${receiptIndex}"]`)
-      /* if (receiptImage.height > maxReceiptHeight) {
-        maxReceiptHeight = receiptImage.height
-      } */
-      receipt.originalWidth = receiptImage.width
-      receipt.originalHeight = receiptImage.height
-      
-    })
-    // receiptGroups[date].maxReceiptHeight = maxReceiptHeight
-  }
 
   const doc = new jsPDF();
   const drawCoordinatesY = [
@@ -245,7 +240,7 @@ const generatePdf = () => {
   display: none;
 }
 
-@media screen and (min-height: 580px) {
+@media screen and (min-height: 614px) {
   .made-by {
     display: block
   }
